@@ -13,6 +13,7 @@ Analiza relatiei dintre rata copiilor de varsta scolara primara neinscrisi la sc
 
 - `proiect_pvdp.ipynb` - analiza completa: 6 vizualizari (choropleth, box plot, top/bottom 15, scatter+LOWESS, evolutie temporala, dumbbell), teste Pearson/Spearman, interpretare.
 - `data/` - snapshot CSV-uri OWID (~400 KB), citite de notebook.
+- `docs/` - landing page + data browser interactiv, publicat via GitHub Pages.
 - `run.bat` / `run.sh` - launchere care instaleaza dependentele si pornesc jupyter.
 
 ## Rulare
@@ -33,4 +34,6 @@ jupyter notebook proiect_pvdp.ipynb
 
 ## Vizualizare online
 
-Notebook-ul `proiect_pvdp.ipynb` este randat **interactiv** direct pe GitHub - graficele Plotly (harti choropleth, scatter, box plot etc.) sunt navigabile in browser fara clonarea repo-ului. Suficient sa fie deschis fisierul `.ipynb` din interfata GitHub.
+**Notebook (analiza completa)**: randat de [nbviewer.org](https://nbviewer.org/github/danielw98/primary-school-oos-gdp-analysis/blob/main/proiect_pvdp.ipynb) - graficele Plotly (harti choropleth, scatter, box plot etc.) sunt navigabile in browser fara clonarea repo-ului.
+
+**Data browser interactiv (GitHub Pages)**: pagina HTML de explorare a celor doua dataset-uri, cu filtre live (an, regiune, PIB, search), multi-sort (Shift+click) si drilldown pe tara. URL: `https://danielw98.github.io/primary-school-oos-gdp-analysis/`.

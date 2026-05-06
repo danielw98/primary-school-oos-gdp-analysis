@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<title>PVDP - Data browser</title>
+<link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator_simple.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css">
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-basic-2.35.2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
+</head>
+<body>
+<header>
+  <h1>Cine nu merge la scoala?</h1>
+  <p>Rata copiilor neinscrisi la scoala primara (UNESCO via OWID) langa PIB per capita (World Bank via OWID), pentru fiecare tara, an cu an. Companion interactiv la <a href="https://nbviewer.org/github/danielw98/primary-school-oos-gdp-analysis/blob/main/proiect_pvdp.ipynb" class="nb-link">notebook-ul proiectului</a> - filtreaza, sorteaza, click pe orice tara pentru traiectoria completa.</p>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-panel="oos">Out-of-school rate (primar)</button>
+    <button class="tab" data-panel="gdp">PIB per capita</button>
+    <button class="tab" data-panel="joined">Joined (PIB vs OOS)</button>
+  </div>
+
+  <!-- OOS TAB -->
+  <section id="panel-oos" class="panel active">
+    <div class="meta">
+      <span><strong>Sursa:</strong> ourworldindata.org/grapher/children-not-in-school</span>
+      <span><strong>Fisier:</strong> data/children-not-in-school-primary.csv</span>
+    </div>
+
+    <div class="filter-bar" data-tab="oos">
+      <input type="text" class="search-input" placeholder="Cauta tara...">
+      <div class="region-chips"></div>
+      <div class="year-range">
+        <span class="label">Ani:</span>
+        <span class="value-from">-</span>
+        <div class="slider"></div>
+        <span class="value-to">-</span>
+      </div>
+      <button class="clear-btn">Clear</button>
+    </div>
+    <div class="filter-hint">Tip: <kbd>Shift</kbd>+click pe alta coloana = sortare secundara (then-by)</div>
+    <div class="sort-breadcrumb" data-tab="oos"></div>
+
+    <div class="stats-tiles" data-tab="oos">
+      <div class="tile"><div class="big-num" data-stat="rows">-</div><div class="label">randuri</div></div>
+      <div class="tile"><div class="big-num" data-stat="countries">-</div><div class="label">tari</div></div>
+      <div class="tile"><div class="big-num" data-stat="years">-</div><div class="label">ani</div></div>
+      <div class="tile"><div class="big-num" data-stat="mean" data-key="Primary school age" data-suffix="%">-</div><div class="label">media OOS</div></div>
+    </div>
+
+    <div class="sparkline-card">
+      <div class="hint">Media OOS globala an cu an (filtrele de mai sus aplicate)</div>
+      <div id="oos-sparkline" class="sparkline"></div>
+    </div>
+
+    <div id="table-oos"></div>
+  </section>
+
+  <!-- GDP TAB -->
+  <section id="panel-gdp" class="panel">
+    <div class="meta">
+      <span><strong>Sursa:</strong> ourworldindata.org/grapher/gdp-per-capita-worldbank</span>
+      <span><strong>Fisier:</strong> data/gdp-per-capita-worldbank.csv</span>
+    </div>
+
+    <div class="filter-bar" data-tab="gdp">
+      <input type="text" class="search-input" placeholder="Cauta tara...">
+      <div class="region-chips"></div>
+      <div class="year-range">
+        <span class="label">Ani:</span>
+        <span class="value-from">-</span>
+        <div class="slider"></div>
+        <span class="value-to">-</span>
+      </div>
+      <div class="gdp-range">
+        <span class="label">PIB ($/cap):</span>
+        <span class="value-from">-</span>
+        <div class="slider"></div>
+        <span class="value-to">-</span>
+      </div>
+      <button class="clear-btn">Clear</button>
+    </div>
+    <div class="filter-hint">Tip: <kbd>Shift</kbd>+click pe alta coloana = sortare secundara (then-by)</div>
+    <div class="sort-breadcrumb" data-tab="gdp"></div>
+
+    <div class="stats-tiles" data-tab="gdp">
+      <div class="tile"><div class="big-num" data-stat="rows">-</div><div class="label">randuri</div></div>
+      <div class="tile"><div class="big-num" data-stat="countries">-</div><div class="label">tari</div></div>
+      <div class="tile"><div class="big-num" data-stat="years">-</div><div class="label">ani</div></div>
+      <div class="tile"><div class="big-num" data-stat="mean" data-key="GDP per capita" data-suffix=" $">-</div><div class="label">media PIB</div></div>
+    </div>
+
+    <div class="sparkline-card">
+      <div class="hint">Media PIB/capita globala an cu an (filtrele de mai sus aplicate)</div>
+      <div id="gdp-sparkline" class="sparkline"></div>
+    </div>
+
+    <div id="table-gdp"></div>
+  </section>
+
+  <!-- JOINED TAB -->
+  <section id="panel-joined" class="panel">
+    <div class="meta">
+      <span><strong>Join pe:</strong> (Tara, An)</span>
+    </div>
+
+    <div class="filter-bar" data-tab="joined">
+      <input type="text" class="search-input" placeholder="Cauta tara...">
+      <div class="region-chips"></div>
+      <div class="year-range">
+        <span class="label">Ani:</span>
+        <span class="value-from">-</span>
+        <div class="slider"></div>
+        <span class="value-to">-</span>
+      </div>
+      <div class="gdp-range">
+        <span class="label">PIB ($/cap):</span>
+        <span class="value-from">-</span>
+        <div class="slider"></div>
+        <span class="value-to">-</span>
+      </div>
+      <button class="clear-btn">Clear</button>
+    </div>
+    <div class="filter-hint">Tip: <kbd>Shift</kbd>+click pe alta coloana = sortare secundara (then-by)</div>
+    <div class="sort-breadcrumb" data-tab="joined"></div>
+
+    <div class="stats-tiles" data-tab="joined">
+      <div class="tile"><div class="big-num" data-stat="rows">-</div><div class="label">randuri</div></div>
+      <div class="tile"><div class="big-num" data-stat="countries">-</div><div class="label">tari</div></div>
+      <div class="tile"><div class="big-num" data-stat="years">-</div><div class="label">ani</div></div>
+      <div class="tile"><div class="big-num" data-stat="mean" data-key="OOS rate" data-suffix="%">-</div><div class="label">media OOS</div></div>
+      <div class="tile"><div class="big-num" data-stat="mean" data-key="GDP per capita" data-suffix=" $">-</div><div class="label">media PIB</div></div>
+    </div>
+
+    <div class="scatter-card">
+      <div class="hint">PIB/capita (log) vs rata neinscrisi. Hover pentru tara/an. Click pe punct sau rand din tabel pentru timeseries pe tara.</div>
+      <div id="joined-scatter"></div>
+    </div>
+    <div id="table-joined"></div>
+  </section>
+
+  <footer>
+    Sursa cod: <a href="https://github.com/danielw98/primary-school-oos-gdp-analysis">github.com/danielw98/primary-school-oos-gdp-analysis</a>. Local: <code>browse.bat</code> / <code>browse.sh</code> -> <code>http://127.0.0.1:8000/</code>.
+  </footer>
+</main>
+
+<!-- Country detail panel -->
+<div id="backdrop" class="backdrop"></div>
+<aside id="detail-panel" class="detail-panel" aria-hidden="true">
+  <div class="ph">
+    <div>
+      <h2 id="detail-title">-</h2>
+      <div class="sub" id="detail-sub"></div>
+    </div>
+    <button class="close-btn" id="detail-close" aria-label="Inchide">x</button>
+  </div>
+  <div id="detail-chart"></div>
+  <div class="stats" id="detail-stats"></div>
+</aside>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
